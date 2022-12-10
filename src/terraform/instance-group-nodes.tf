@@ -24,7 +24,7 @@ resource "yandex_compute_instance_group" "ig-nodes" {
     network_interface {
       network_id = yandex_vpc_network.lab-net.id
       subnet_ids = ["${yandex_vpc_subnet.private-a.id}", "${yandex_vpc_subnet.private-b.id}", "${yandex_vpc_subnet.private-c.id}"]
-      nat        = true
+      #      nat        = true
     }
 
     metadata = {
