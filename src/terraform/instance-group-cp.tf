@@ -47,16 +47,6 @@ resource "yandex_compute_instance_group" "ig-cp" {
     max_expansion   = 0
   }
 
-  #  health_check {
-  #    interval            = 5
-  #    timeout             = 2
-  #    healthy_threshold   = 3
-  #    unhealthy_threshold = 3
-  #    tcp_options {
-  #      port = 6443
-  #    }
-  #  }
-
   load_balancer {
     target_group_name = "cp-target-group-lb"
   }

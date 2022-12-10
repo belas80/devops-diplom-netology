@@ -14,6 +14,7 @@ resource "yandex_vpc_route_table" "lab-rt-a" {
   }
 }
 
+# Public subnet
 resource "yandex_vpc_subnet" "public" {
   v4_cidr_blocks = ["192.168.1.0/24"]
   zone           = "ru-central1-a"
