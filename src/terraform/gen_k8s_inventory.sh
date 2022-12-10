@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -11,7 +11,7 @@ for (( i=0; i<$count_cp; i++ ));
 do
   terraform output -json cp_names | jq -j ".[][$i]"
   printf "   ansible_host="
-  terraform output -json cp_external_ip | jq -j ".[][$i]"
+  terraform output -json cp_ips | jq -j ".[][$i]"
   printf "\n"
 done
 
@@ -19,7 +19,7 @@ for (( i=0; i<$count_nodes; i++ ));
 do
   terraform output -json node_names | jq -j ".[][$i]"
   printf "   ansible_host="
-  terraform output -json nodes_external_ip | jq -j ".[][$i]"
+  terraform output -json nodes_ips | jq -j ".[][$i]"
   printf "\n"
 done
 
