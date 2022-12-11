@@ -23,8 +23,6 @@ do
   printf "\n"
 done
 
-# [bastion]
-# bastion ansible_host=x.x.x.x ansible_user=some_user
 printf "\n[bastion]\n"
 printf "bastion ansible_host="
 terraform output -json bastion_external_ip | jq -jc ".[]"
