@@ -222,3 +222,8 @@ node2   Ready    <none>          139m   v1.25.4
 
 ### Создание тестового приложения  
 
+Репозиторий с простым nginx конфигом, dockerfile и html страничкой [здесь](https://github.com/belas80/myapp.git)
+Регистр с собранным docker image [здесь](https://hub.docker.com/r/belas80/myapp/tags)
+
+### Подготовка cистемы мониторинга и деплой приложения  
+
