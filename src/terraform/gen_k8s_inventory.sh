@@ -31,7 +31,7 @@ printf " ansible_user=ubuntu\n"
 printf "\n[all:vars]\n"
 printf "ansible_user=ubuntu\n"
 printf "supplementary_addresses_in_ssl_keys='"
-terraform output -json lb_external_ip | jq -cj ".[][]"
+terraform output -json lb_cp_external_ip | jq -cj ".[][0]"
 printf "'\n\n"
 
 printf "[kube_control_plane]\n"

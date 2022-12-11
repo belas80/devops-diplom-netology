@@ -47,4 +47,8 @@ resource "yandex_compute_instance_group" "ig-nodes" {
     max_expansion   = 0
   }
 
+  load_balancer {
+    target_group_name = "nodes-target-group-lb"
+  }
+
 }

@@ -2,7 +2,7 @@ resource "yandex_lb_network_load_balancer" "cp-lb" {
   name = "cp-load-balancer"
 
   listener {
-    name = "my-listener"
+    name = "my-masters"
     port = 6443
     external_address_spec {
       ip_version = "ipv4"

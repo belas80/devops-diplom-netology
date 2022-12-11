@@ -18,6 +18,10 @@ output "nodes_ips" {
   value = [yandex_compute_instance_group.ig-nodes.instances[*].network_interface[0].ip_address]
 }
 
-output "lb_external_ip" {
+output "lb_cp_external_ip" {
   value = [yandex_lb_network_load_balancer.cp-lb.listener[*].external_address_spec[*].address]
+}
+
+output "lb_nodes_external_ip" {
+  value = [yandex_lb_network_load_balancer.nodes-lb.listener[*].external_address_spec[*].address]
 }
