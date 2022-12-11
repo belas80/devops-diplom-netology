@@ -1,5 +1,13 @@
 # Дипломная работа netology
 
+  * [Цели:](#цели)
+  * [Этапы выполнения:](#этапы-выполнения)
+     * [Создание облачной инфраструктуры](#создание-облачной-инфраструктуры)
+     * [Создание Kubernetes кластера](#создание-kubernetes-кластера)
+     * [Создание тестового приложения](#создание-тестового-приложения)
+     * [Подготовка cистемы мониторинга и деплой приложения](#подготовка-cистемы-мониторинга-и-деплой-приложения)
+     * [Установка и настройка CI/CD](#установка-и-настройка-cicd)
+
 ## Цели:
 
 1. Подготовить облачную инфраструктуру на базе облачного провайдера Яндекс.Облако.
@@ -8,6 +16,8 @@
 4. Настроить и автоматизировать сборку тестового приложения с использованием Docker-контейнеров.
 5. Настроить CI для автоматической сборки и тестирования.
 6. Настроить CD для автоматического развёртывания приложения.
+
+## Этапы выполнения:  
 
 ### Создание облачной инфраструктуры  
 
@@ -117,4 +127,98 @@ yandex_vpc_network.lab-net: Destruction complete after 1s
 
 Destroy complete! Resources: 4 destroyed.
 ```
+
+### Создание Kubernetes кластера  
+
+Для создания кластера подготовим две инстанс группы, для Control Plane  [instance-group-cp.tf](src/terraform/instance-group-cp.tf) 
+и для рабочих нод [instance-group-nodes.tf](src/terraform/instance-group-nodes.tf). Количесво хостов будет зависить от текущего воркспейса, которые определены в [variables.tf](src/terraform/variables.tf#L13).
+Для воркспейса `stage` будет одна control plane и две рабочих ноды, а для `prod` будет 3 control plane и 3 рабочих ноды.  
+Кластер будет в приватной сети, доступ к инетрету организован через nat ([instance-nat.tf](src/terraform/instance-nat.tf)) в отдельной публичной сети.
+Так же этот инстанс будет использован в качестве бастиона для разворачивания k8s.  
+Подготовим network load balancer для доступа к нашим contor plane по внешнему IP адресу [balancer-cp.tf](src/terraform/balancer-cp.tf).  
+  
+После применения конфигурации terraform, задеплоим k8s с помощью kubespray. Для этого подготовим файл интвентори с помощью bash скрипта [gen_k8s_inventory.sh](src/terraform/gen_k8s_inventory.sh).
+Скрипт выведет в стандартный вывод значения из output терраформа, а мы перенаправим их нужное нам место, например:  
+```shell
+./gen_k8s_inventory.sh > ~/netology/kubespray2/inventory/mycluster/inventory.ini
+```
+Пример готового инвернтори [inventory.ini](src/kubespray_inventory/inventory.ini).  
+Этого достаточно для деплоя:  
+```shell
+ansible-playbook -i inventory/mycluster/inventory.ini --become cluster.yml
+```
+После того как кластер k8s развернется, скопируем конфиг kubectl с любой control plane ноды себе на компьютер и поменяем IP кластера в нем на внешний адрес нашего load balancer для мастеров.
+С помощью скрипта bash [get_k8s_config.sh](src/terraform/get_k8s_config.sh), конфиг по умолчнанию скопируется в домашнюю директорию `~/.kube/config`  
+```shell
+./get_k8s_config.sh
+```
+  
+Результат:  
+
+```shell
+# Инстансы
+ % yc compute instance list
++----------------------+-------+---------------+---------+--------------+---------------+
+|          ID          | NAME  |    ZONE ID    | STATUS  | EXTERNAL IP  |  INTERNAL IP  |
++----------------------+-------+---------------+---------+--------------+---------------+
+| ef3e6ujbvvn0ll9pjobd | node2 | ru-central1-c | RUNNING |              | 192.168.22.34 |
+| epd1gum2c9l6lq5tjkpa | node1 | ru-central1-b | RUNNING |              | 192.168.21.9  |
+| epdg9utmmrgbsfdi49lb | cp1   | ru-central1-b | RUNNING |              | 192.168.21.35 |
+| fhmkbs1093990h4ekcel | nat   | ru-central1-a | RUNNING | 62.84.113.20 | 192.168.1.254 |
++----------------------+-------+---------------+---------+--------------+---------------+
+
+# Инстанс группы
+% yc compute instance-group list
++----------------------+----------+--------+------+
+|          ID          |   NAME   | STATUS | SIZE |
++----------------------+----------+--------+------+
+| cl1fi52qrsh3q6bajpnj | ig-cp    | ACTIVE |    1 |
+| cl1i8hv2a46usa922oc5 | ig-nodes | ACTIVE |    2 |
++----------------------+----------+--------+------+
+
+# Балансеры
+ % yc load-balancer network-load-balancer list
++----------------------+---------------------+-------------+----------+----------------+------------------------+--------+
+|          ID          |        NAME         |  REGION ID  |   TYPE   | LISTENER COUNT | ATTACHED TARGET GROUPS | STATUS |    
++----------------------+---------------------+-------------+----------+----------------+------------------------+--------+
+| enpn9nn9itamve6tegn3 | nodes-load-balancer | ru-central1 | EXTERNAL |              1 | enpmket4ec55hi2pvjeu   | ACTIVE |
+| enpr0826t77sdiea3kma | cp-load-balancer    | ru-central1 | EXTERNAL |              1 | enp4r73r93obl16cjkqn   | ACTIVE |
++----------------------+---------------------+-------------+----------+----------------+------------------------+--------+
+
+# Таргет группа
+% yc load-balancer network-load-balancer target-states --name=cp-load-balancer --target-group-id=enp4r73r93obl16cjkqn
++----------------------+---------------+---------+
+|      SUBNET ID       |    ADDRESS    | STATUS  |
++----------------------+---------------+---------+
+| e2lr7amvqvpjugas5sqa | 192.168.21.35 | HEALTHY |
++----------------------+---------------+---------+
+
+% yc load-balancer network-load-balancer target-states --name=nodes-load-balancer --target-group-id=enpmket4ec55hi2pvjeu
++----------------------+---------------+---------+
+|      SUBNET ID       |    ADDRESS    | STATUS  |
++----------------------+---------------+---------+
+| b0c9jirv06s7v1sit00k | 192.168.22.34 | HEALTHY |
+| e2lr7amvqvpjugas5sqa | 192.168.21.9  | HEALTHY |
++----------------------+---------------+---------+
+
+# IP нашего балансировщика к мастерам
+% terraform output -json lb_cp_external_ip
+[[["51.250.94.150"]]]
+
+# Копируем конфиг kubectl и проверяем работу k8s
+% ./get_k8s_config.sh 
+
+% kubectl cluster-info 
+Kubernetes control plane is running at https://51.250.94.150:6443
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+% kubectl get nodes 
+NAME    STATUS   ROLES           AGE    VERSION
+cp1     Ready    control-plane   140m   v1.25.4
+node1   Ready    <none>          139m   v1.25.4
+node2   Ready    <none>          139m   v1.25.4
+```
+
+### Создание тестового приложения  
 
