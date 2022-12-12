@@ -10,3 +10,4 @@ ssh -J ubuntu@$bastion_ip ubuntu@$cp1_ip "sudo cat /etc/kubernetes/admin.conf" >
 
 sed -i -- "s/127.0.0.1/$lb_ip/g" ~/.kube/config
 
+chmod 600 ~/.kube/config
