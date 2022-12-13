@@ -8,9 +8,9 @@ spec:
   - port: 80
     name: http
     # Порт контейнера, на котором доступно приложение.
-    targetPort: 8080
+    targetPort: 80
     nodePort: 30000
   # Метки селектора, использованные в шаблоне подов при создании объекта Deployment.
   selector:
-    app.kubernetes.io/instance: myapp
+    app: myapp
   type: NodePort
