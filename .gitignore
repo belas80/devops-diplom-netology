@@ -30,3 +30,5 @@ override.tf.json
 
 key.json
 src/kubespray/
+token
+webhook-secret

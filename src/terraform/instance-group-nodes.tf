@@ -8,7 +8,7 @@ resource "yandex_compute_instance_group" "ig-nodes" {
     name        = "node{instance.index}"
     hostname    = "node{instance.index}"
     resources {
-      memory = 2
+      memory = 4
       cores  = 2
     }
 
