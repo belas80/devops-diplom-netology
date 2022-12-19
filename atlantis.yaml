@@ -6,7 +6,7 @@ parallel_apply: true
 projects:
 - name: stage
   branch: /main/
-  dir: src/terraform
+  dir: terraform
   workspace: stage
   terraform_version: v1.3.5
   delete_source_branch_on_merge: true
