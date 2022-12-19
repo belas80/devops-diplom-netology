@@ -7,7 +7,7 @@ resource "yandex_compute_instance" "instance-nat" {
 
   resources {
     cores  = 2
-    memory = 2
+    memory = 4
   }
 
   boot_disk {
