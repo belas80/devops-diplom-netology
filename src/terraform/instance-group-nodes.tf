@@ -4,9 +4,10 @@ resource "yandex_compute_instance_group" "ig-nodes" {
   service_account_id = yandex_iam_service_account.ig-sa.id
   depends_on         = [yandex_resourcemanager_folder_iam_binding.editor]
   instance_template {
-    platform_id = "standard-v3"
-    name        = "node{instance.index}"
-    hostname    = "node{instance.index}"
+    platform_id        = "standard-v3"
+    name               = "node{instance.index}"
+    hostname           = "node{instance.index}"
+    service_account_id = "ajed8fnmgbntfj1kq2oj"
     resources {
       memory = 4
       cores  = 2

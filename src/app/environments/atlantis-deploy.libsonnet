@@ -6,7 +6,7 @@ base {
   components +: {
     atlantis_deploy +: {
       atlantis_user: "belas80",
-      repo_allowlist: "github.com/belas80/devops-diplom-netology/*",
+      repo_allowlist: "github.com/belas80/devops-diplom-netology",
     },
   }
 }

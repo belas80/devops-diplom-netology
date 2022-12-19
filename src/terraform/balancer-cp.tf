@@ -6,7 +6,7 @@ resource "yandex_lb_network_load_balancer" "cp-lb" {
     port = 6443
     external_address_spec {
       ip_version = "ipv4"
-      address = "84.201.141.69"
+      address    = "84.201.141.69"
     }
   }
 
