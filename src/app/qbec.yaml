@@ -20,6 +20,13 @@ spec:
         - atlantis
       excludes:
         - myapp
+    atlantis-deploy:
+      defaultNamespace: default
+      server: https://84.201.132.33:6443
+      includes:
+        - atlantis-deploy
+      excludes:
+        - myapp
   vars: {}
   excludes:
     - atlantis

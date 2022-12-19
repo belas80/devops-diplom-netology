@@ -1,3 +1,6 @@
+local p = import '../params.libsonnet';
+local params = p.components.atlantis_deploy;
+
 [
   {
     "apiVersion": "apps/v1",
@@ -27,11 +30,11 @@
               "env": [
                 {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
-                  "value": "github.com/belas80/devops-diplom-netology/*"
+                  "value": params.repo_allowlist
                 },
                 {
                   "name": "ATLANTIS_GH_USER",
-                  "value": "belas80"
+                  "value": params.atlantis_user
                 },
                 {
                   "name": "ATLANTIS_GH_TOKEN",
