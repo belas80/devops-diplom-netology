@@ -32,3 +32,5 @@ key.json
 src/kubespray/
 token
 webhook-secret
+tf_access_key
+tf_secret_key
