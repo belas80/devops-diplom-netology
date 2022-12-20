@@ -64,3 +64,10 @@ spec:
             port: 4141
             # If using https, change this to HTTPS
             scheme: HTTP
+        volumeMounts:
+          - name: tf-config
+            mountPath: /home/atlantis
+      volumes:
+        - name: tf-config
+          configMap:
+            name: yc-tf-config

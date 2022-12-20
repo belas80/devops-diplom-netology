@@ -29,6 +29,14 @@ local params = p.components.atlantis_deploy;
             {
               "env": [
                 {
+                  "name": "AWS_ACCESS_KEY_ID",
+                  "value": params.tf_access_key
+                },
+                {
+                  "name": "AWS_SECRET_ACCESS_KEY",
+                  "value": params.tf_secret_key
+                },
+                {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
                   "value": params.repo_allowlist
                 },
@@ -53,6 +61,10 @@ local params = p.components.atlantis_deploy;
                       "name": "atlantis-vcs"
                     }
                   }
+                },
+                {
+                  "name": "ATLANTIS_REPO_CONFIG_JSON",
+                  "value": params.repo_config_json
                 },
                 {
                   "name": "ATLANTIS_PORT",
