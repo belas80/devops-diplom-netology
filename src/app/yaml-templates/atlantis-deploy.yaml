@@ -66,8 +66,17 @@ spec:
             scheme: HTTP
         volumeMounts:
           - name: tf-config
-            mountPath: /home/atlantis
+            mountPath: /home/atlantis/.terraformrc
+            subPath: .terraformrc
+            readOnly: true
+          - name: ssh-key
+            mountPath: /home/atlantis/.ssh/id_rsa.pub
+            subPath: id_rsa.pub
+            readOnly: true
       volumes:
         - name: tf-config
           configMap:
-            name: yc-tf-config
+            name: tf-provider-config
+        - name: ssh-key
+          secret:
+            secretName: ssh-key

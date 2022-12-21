@@ -30,11 +30,21 @@ local params = p.components.atlantis_deploy;
               "env": [
                 {
                   "name": "AWS_ACCESS_KEY_ID",
-                  "value": params.tf_access_key
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "tf_access_key",
+                      "name": "atlantis-tf"
+                    }
+                  }
                 },
                 {
                   "name": "AWS_SECRET_ACCESS_KEY",
-                  "value": params.tf_secret_key
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "tf_secret_key",
+                      "name": "atlantis-tf"
+                    }
+                  }
                 },
                 {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
@@ -104,6 +114,34 @@ local params = p.components.atlantis_deploy;
                   "cpu": "100m",
                   "memory": "256Mi"
                 }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/home/atlantis/.terraformrc",
+                  "name": "tf-config",
+                  "readOnly": true,
+                  "subPath": ".terraformrc"
+                },
+                {
+                  "mountPath": "/home/atlantis/.ssh/id_rsa.pub",
+                  "name": "ssh-key",
+                  "readOnly": true,
+                  "subPath": "id_rsa.pub"
+                }
+              ]
+            }
+          ],
+          "volumes": [
+            {
+              "configMap": {
+                "name": "tf-provider-config"
+              },
+              "name": "tf-config"
+            },
+            {
+              "name": "ssh-key",
+              "secret": {
+                "secretName": "ssh-key"
               }
             }
           ]
