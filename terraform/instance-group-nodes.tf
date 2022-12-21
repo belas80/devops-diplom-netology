@@ -7,7 +7,7 @@ resource "yandex_compute_instance_group" "ig-nodes" {
     platform_id        = "standard-v3"
     name               = "node{instance.index}"
     hostname           = "node{instance.index}"
-    service_account_id = "ajed8fnmgbntfj1kq2oj"
+#    service_account_id = "ajed8fnmgbntfj1kq2oj"
     resources {
       memory = 4
       cores  = 2
