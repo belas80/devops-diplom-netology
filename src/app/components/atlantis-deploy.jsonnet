@@ -135,6 +135,9 @@ local params = p.components.atlantis_deploy;
               ]
             }
           ],
+          "securityContext": {
+            "fsGroup": 1000
+          },
           "volumes": [
             {
               "configMap": {
