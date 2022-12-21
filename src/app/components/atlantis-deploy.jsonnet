@@ -51,6 +51,10 @@ local params = p.components.atlantis_deploy;
                   "value": params.repo_allowlist
                 },
                 {
+                  "name": "ATLANTIS_ATLANTIS_URL",
+                  "value": params.atlantis_url
+                },
+                {
                   "name": "ATLANTIS_GH_USER",
                   "value": params.atlantis_user
                 },
