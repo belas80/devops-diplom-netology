@@ -12,7 +12,7 @@ projects:
   autoplan:
     when_modified: ["*.tf", "../modules/**/*.tf"]
     enabled: true
-  apply_requirements: [mergeable, approved]
+  apply_requirements: [mergeable]
   workflow: myworkflow
 workflows:
   myworkflow:
