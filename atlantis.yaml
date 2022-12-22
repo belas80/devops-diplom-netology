@@ -3,9 +3,19 @@ automerge: true
 parallel_plan: true
 parallel_apply: true
 projects:
-- name: staging
+- name: stage
   dir: terraform
   workspace: stage
+  terraform_version: v1.3.5
+  delete_source_branch_on_merge: true
+  autoplan:
+    when_modified: ["*.tf", "../modules/**/*.tf"]
+    enabled: true
+  apply_requirements: [mergeable]
+  workflow: myworkflow
+- name: prod
+  dir: terraform
+  workspace: prod
   terraform_version: v1.3.5
   delete_source_branch_on_merge: true
   autoplan:
