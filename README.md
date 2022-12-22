@@ -231,11 +231,48 @@ node2   Ready    <none>          139m   v1.25.4
 ### Подготовка cистемы мониторинга и деплой приложения  
 
 1. Задеплоить в кластер мониторинг. Воспользовался пакетом [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus).
-Конфиги prometheus находятся [здесь](kube-prometheus). Из изменений, включил nodePort и отключил networkpolicies для настройки доступа к нему с наружи [здесь](kube-prometheus/example.jsonnet#6)
+Конфиги prometheus находятся [здесь](kube-prometheus/manifests). Перед генерацией конфигов включил nodePort и отключил networkpolicies, для настройки доступа к нему с наружи [здесь](kube-prometheus/example.jsonnet#L6)
 ```shell
 # Делой в кластер
 kubectl apply --server-side -f manifests/setup
 kubectl apply -f manifests/
+
+# Проверка
+% kubectl get -n monitoring deploy,po,svc
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/blackbox-exporter     1/1     1            1           91m
+deployment.apps/grafana               1/1     1            1           91m
+deployment.apps/kube-state-metrics    1/1     1            1           91m
+deployment.apps/prometheus-adapter    2/2     2            2           91m
+deployment.apps/prometheus-operator   1/1     1            1           92m
+
+NAME                                       READY   STATUS    RESTARTS      AGE
+pod/alertmanager-main-0                    2/2     Running   0             91m
+pod/alertmanager-main-1                    2/2     Running   1 (91m ago)   91m
+pod/alertmanager-main-2                    2/2     Running   0             91m
+pod/blackbox-exporter-68d54c49dc-dvk24     3/3     Running   0             91m
+pod/grafana-6cd5ccdcb8-x7wcq               1/1     Running   0             91m
+pod/kube-state-metrics-84db6cc79c-rpd9b    3/3     Running   0             91m
+pod/node-exporter-7f2vb                    2/2     Running   0             91m
+pod/node-exporter-8gbbn                    2/2     Running   0             91m
+pod/node-exporter-rgvsp                    2/2     Running   0             91m
+pod/prometheus-adapter-757f9b4cf9-5kwx6    1/1     Running   0             91m
+pod/prometheus-adapter-757f9b4cf9-k42f4    1/1     Running   0             91m
+pod/prometheus-k8s-0                       2/2     Running   0             91m
+pod/prometheus-k8s-1                       2/2     Running   0             91m
+pod/prometheus-operator-7cf95bc44c-4rd67   2/2     Running   0             92m
+
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/alertmanager-main       NodePort    10.233.44.162   <none>        9093:30903/TCP               91m
+service/alertmanager-operated   ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP   91m
+service/blackbox-exporter       ClusterIP   10.233.54.215   <none>        9115/TCP,19115/TCP           91m
+service/grafana                 NodePort    10.233.14.91    <none>        3000:30902/TCP               91m
+service/kube-state-metrics      ClusterIP   None            <none>        8443/TCP,9443/TCP            91m
+service/node-exporter           ClusterIP   None            <none>        9100/TCP                     91m
+service/prometheus-adapter      ClusterIP   10.233.52.69    <none>        443/TCP                      91m
+service/prometheus-k8s          NodePort    10.233.50.105   <none>        9090:30900/TCP               91m
+service/prometheus-operated     ClusterIP   None            <none>        9090/TCP                     91m
+service/prometheus-operator     ClusterIP   None            <none>        8443/TCP                     92m
 ```
 Дашборды графаны доступы на белом IP  
 ![](img/grafana-dashboards.png)
