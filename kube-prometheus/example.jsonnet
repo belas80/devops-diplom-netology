@@ -4,11 +4,11 @@ local kp =
   // (import 'kube-prometheus/addons/anti-affinity.libsonnet') +
   // (import 'kube-prometheus/addons/managed-cluster.libsonnet') +
   (import 'kube-prometheus/addons/node-ports.libsonnet') +
+  (import 'kube-prometheus/addons/networkpolicies-disabled.libsonnet') +
   // (import 'kube-prometheus/addons/static-etcd.libsonnet') +
   // (import 'kube-prometheus/addons/custom-metrics.libsonnet') +
   // (import 'kube-prometheus/addons/external-metrics.libsonnet') +
   // (import 'kube-prometheus/addons/pyrra.libsonnet') +
-  (import 'kube-prometheus/addons/networkpolicies-disabled.libsonnet') +
   {
     values+:: {
       common+: {

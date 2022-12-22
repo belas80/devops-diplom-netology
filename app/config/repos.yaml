@@ -3,5 +3,5 @@ repos:
 - id: github.com/belas80/devops-diplom-netology
 
   # На стороне клиентского конфига разрешите изменять workflow
-  allowed_overrides: [workflow]
+  allowed_overrides: [workflow, apply_requirements, delete_source_branch_on_merge]
   allow_custom_workflows: true

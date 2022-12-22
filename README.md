@@ -23,7 +23,7 @@
 
 Backend для Terraform будет храниться в S3 bucket. Для работы с бакетом используется отдельная сервисная учетка с ролью 
 `storage.editor`.  
-Конфиг [backend.tf](src/terraform/backend.tf):  
+Конфиг [backend.tf](terraform/backend.tf):  
 ```terraform
 terraform {
   backend "s3" {
@@ -92,7 +92,7 @@ for this configuration.
 2022-11-22 16:08:31        180 env:/stage/main/terraform.tfstate
 ```
 
-VPC с подсетями в разных зонах доступности определен в файле [network.tf](src/terraform/network.tf)  
+VPC с подсетями в разных зонах доступности определен в файле [network.tf](terraform/network.tf)  
 Проверка созадния ресурсов:  
 ```shell
 % terraform apply -auto-approve
@@ -128,27 +128,28 @@ yandex_vpc_network.lab-net: Destruction complete after 1s
 Destroy complete! Resources: 4 destroyed.
 ```
 
+---
 ### Создание Kubernetes кластера  
 
-Для создания кластера подготовим две инстанс группы, для Control Plane  [instance-group-cp.tf](src/terraform/instance-group-cp.tf) 
-и для рабочих нод [instance-group-nodes.tf](src/terraform/instance-group-nodes.tf). Количесво хостов будет зависить от текущего воркспейса, которые определены в [variables.tf](src/terraform/variables.tf#L13).
+Для создания кластера подготовим две инстанс группы, для Control Plane  [instance-group-cp.tf](terraform/instance-group-cp.tf) 
+и для рабочих нод [instance-group-nodes.tf](terraform/instance-group-nodes.tf). Количесво хостов будет зависить от текущего воркспейса, которые определены в [variables.tf](terraform/variables.tf#L13).
 Для воркспейса `stage` будет одна control plane и две рабочих ноды, а для `prod` будет 3 control plane и 3 рабочих ноды.  
-Кластер будет в приватной сети, доступ к инетрету организован через nat ([instance-nat.tf](src/terraform/instance-nat.tf)) в отдельной публичной сети.
+Кластер будет в приватной сети, доступ к инетрету организован через nat ([instance-nat.tf](terraform/instance-nat.tf)) в отдельной публичной сети.
 Так же этот инстанс будет использован в качестве бастиона для разворачивания k8s.  
-Подготовим network load balancer для доступа к нашим contor plane по внешнему IP адресу [balancer-cp.tf](src/terraform/balancer-cp.tf).  
+Подготовим network load balancer для доступа к нашим contor plane по внешнему IP адресу [balancer-cp.tf](terraform/balancer-cp.tf).  
   
-После применения конфигурации terraform, задеплоим k8s с помощью kubespray. Для этого подготовим файл интвентори с помощью bash скрипта [gen_k8s_inventory.sh](src/terraform/gen_k8s_inventory.sh).
+После применения конфигурации terraform, задеплоим k8s с помощью kubespray. Для этого подготовим файл интвентори с помощью bash скрипта [gen_k8s_inventory.sh](terraform/gen_k8s_inventory.sh).
 Скрипт выведет в стандартный вывод значения из output терраформа, а мы перенаправим их нужное нам место, например:  
 ```shell
 ./gen_k8s_inventory.sh > ~/netology/kubespray2/inventory/mycluster/inventory.ini
 ```
-Пример готового инвернтори [inventory.ini](src/kubespray_inventory/inventory.ini).  
+Пример готового инвернтори [inventory.ini](kubespray_inventory/inventory.ini).  
 Этого достаточно для деплоя:  
 ```shell
 ansible-playbook -i inventory/mycluster/inventory.ini --become cluster.yml
 ```
 После того как кластер k8s развернется, скопируем конфиг kubectl с любой control plane ноды себе на компьютер и поменяем IP кластера в нем на внешний адрес нашего load balancer для мастеров.
-С помощью скрипта bash [get_k8s_config.sh](src/terraform/get_k8s_config.sh), конфиг по умолчнанию скопируется в домашнюю директорию `~/.kube/config`  
+С помощью скрипта bash [get_k8s_config.sh](terraform/get_k8s_config.sh), конфиг по умолчнанию скопируется в домашнюю директорию `~/.kube/config`  
 ```shell
 ./get_k8s_config.sh
 ```
@@ -220,10 +221,71 @@ node1   Ready    <none>          139m   v1.25.4
 node2   Ready    <none>          139m   v1.25.4
 ```
 
+---
 ### Создание тестового приложения  
 
 Репозиторий с простым nginx конфигом, dockerfile и html страничкой [здесь](https://github.com/belas80/myapp.git)
 Регистр с собранным docker image [здесь](https://hub.docker.com/r/belas80/myapp/tags)
 
+---
 ### Подготовка cистемы мониторинга и деплой приложения  
+
+1. Задеплоить в кластер мониторинг. Воспользовался пакетом [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus).
+Конфиги prometheus находятся [здесь](kube-prometheus). Из изменений, включил nodePort и отключил networkpolicies для настройки доступа к нему с наружи [здесь](kube-prometheus/example.jsonnet#6)
+```shell
+# Делой в кластер
+kubectl apply --server-side -f manifests/setup
+kubectl apply -f manifests/
+```
+Дашборды графаны доступы на белом IP  
+![](img/grafana-dashboards.png)
+![](img/grafana-workload.png)
+2. Воспользовался qbec для организации конфигурации тестового приложения и atlantis. Все исходники [здесь](app).  
+Для atlanis перед деплоем нужно создать секреты для досутпа к github и terraform, а так же configMap для настройки Yandex провайдера и публичный ключ (для проброса в vm).  
+```shell
+# Для github
+kubectl create secret generic atlantis-vcs --from-file=token --from-file=webhook-secret
+
+# Для доступа к S3, где хранятся стейты
+kubectl create secret generic atlantis-tf --from-file=tf_access_key --from-file=tf_secret_key
+
+# Для доступа к облаку Yandex, токен сервисной учетки
+kubectl create secret generic yc-token --from-literal token=$(yc iam create-token)
+
+# ssh-key для vm
+kubectl create secret generic ssh-key --from-file=$HOME/.ssh/id_rsa.pub
+
+# Настройка Yandex провайдера
+kubectl create configmap tf-provider-config --from-file=config/.terraformrc
+```
+Конфиги атлантиса
+- [Репо сайд](atlantis.yaml)
+- [Сервер сайд](app/config/repos.yaml)
+- [Env](app/environments/atlantis-deploy.libsonnet)
+```shell
+# Деплой приложения
+qbec apply stage --yes
+
+# Деплой Атлантиса
+qbec apply atlantis-deploy --yes
+
+# Проверка
+% kubectl get deployments.apps 
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+atlantis       1/1     1            1           172m
+myapp-deploy   2/2     2            2           48m
+```
+Приложение доступно из браузера:  
+![](img/myapp.png)
+Пример pull request с комментариями созданными atlantis'ом
+![](img/pull_request.png)
+Блокировки в вебморде Атлантиса
+![](img/atlantis_lock.png)
+Коммент `atlantis apply -p stage` и вывод после успешного завершения apply
+![](img/comment_apply.png)
+Вывод в вебморде Атлантиса
+![](img/atlantis_output.png)
+
+---
+### Установка и настройка CI/CD
 
