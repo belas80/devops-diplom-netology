@@ -73,8 +73,10 @@ spec:
             mountPath: /home/atlantis/.ssh/id_rsa.pub
             subPath: id_rsa.pub
             readOnly: true
-      securityContext:
-        fsGroup: 1000
+#      securityContext:
+#        runAsUser: 100
+#        runAsGroup: 1000
+#        fsGroup: 1000
       volumes:
         - name: tf-config
           configMap:

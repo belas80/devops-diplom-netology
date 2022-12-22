@@ -29,7 +29,7 @@ override.tf.json
 # example: *tfplan*
 
 key.json
-src/kubespray/
+kubespray
 token
 webhook-secret
 tf_access_key
