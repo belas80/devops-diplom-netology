@@ -47,6 +47,15 @@ local params = p.components.atlantis_deploy;
                   }
                 },
                 {
+                  "name": "YC_TOKEN",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "token",
+                      "name": "yc-token"
+                    }
+                  }
+                },
+                {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
                   "value": params.repo_allowlist
                 },
@@ -135,9 +144,11 @@ local params = p.components.atlantis_deploy;
               ]
             }
           ],
-          "securityContext": {
-            "fsGroup": 1000
-          },
+//          "securityContext": {
+//             "runAsUser": 100,
+//             "runAsGroup": 1000
+//            "fsGroup": 1000
+//          },
           "volumes": [
             {
               "configMap": {
