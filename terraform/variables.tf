@@ -6,6 +6,10 @@ variable "yandex_folder_id" {
   default = "b1g9eq93ionckal26dpc"
 }
 
+variable "yandex_key_file" {
+  default = "~/.terraform-key/key.json"
+}
+
 variable "ubuntu" {
   default = "fd8kdq6d0p8sij7h5qe3"
 }
