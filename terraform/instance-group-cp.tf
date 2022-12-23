@@ -29,6 +29,11 @@ resource "yandex_compute_instance_group" "ig-cp" {
 
     metadata = {
       ssh-keys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+      user-data = <<-EOT
+        #!/usr/bin/env bash
+        apt update
+        apt install -y nfs-common
+       EOT
     }
   }
 
