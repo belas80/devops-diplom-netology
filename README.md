@@ -286,8 +286,8 @@ kubectl create secret generic atlantis-vcs --from-file=token --from-file=webhook
 # Для доступа к S3, где хранятся стейты
 kubectl create secret generic atlantis-tf --from-file=tf_access_key --from-file=tf_secret_key
 
-# Для доступа к облаку Yandex, токен сервисной учетки
-kubectl create secret generic yc-token --from-literal token=$(yc iam create-token)
+# Для доступа к облаку Yandex, ключ сервисной учетки
+kubectl create secret generic tf-key --from-file=$HOME/.terraform-key/key.json
 
 # ssh-key для vm
 kubectl create secret generic ssh-key --from-file=$HOME/.ssh/id_rsa.pub
