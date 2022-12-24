@@ -27,7 +27,15 @@ spec:
         - atlantis-deploy
       excludes:
         - myapp
+    jenkins:
+      defaultNamespace: default
+      server: https://84.201.141.69:6443
+      includes:
+        - jenkins
+      excludes:
+        - myapp
   vars: {}
   excludes:
     - atlantis
     - atlantis-deploy
+    - jenkins
