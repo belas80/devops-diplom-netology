@@ -28,8 +28,30 @@ local params = p.components.atlantis;
             {
               "env": [
                 {
+                  "name": "AWS_ACCESS_KEY_ID",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "tf_access_key",
+                      "name": "atlantis-tf"
+                    }
+                  }
+                },
+                {
+                  "name": "AWS_SECRET_ACCESS_KEY",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "tf_secret_key",
+                      "name": "atlantis-tf"
+                    }
+                  }
+                },
+                {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
                   "value": params.repo_allowlist
+                },
+                {
+                  "name": "ATLANTIS_ATLANTIS_URL",
+                  "value": params.atlantis_url
                 },
                 {
                   "name": "ATLANTIS_GH_USER",
@@ -52,6 +74,10 @@ local params = p.components.atlantis;
                       "name": "atlantis-vcs"
                     }
                   }
+                },
+                {
+                  "name": "ATLANTIS_REPO_CONFIG_JSON",
+                  "value": params.repo_config_json
                 },
                 {
                   "name": "ATLANTIS_DATA_DIR",
@@ -100,13 +126,51 @@ local params = p.components.atlantis;
                 {
                   "mountPath": "/atlantis",
                   "name": "atlantis-data"
+                },
+                {
+                  "mountPath": "/home/atlantis/.terraformrc",
+                  "name": "tf-config",
+                  "readOnly": true,
+                  "subPath": ".terraformrc"
+                },
+                {
+                  "mountPath": "/home/atlantis/.ssh/id_rsa.pub",
+                  "name": "ssh-key",
+                  "readOnly": true,
+                  "subPath": "id_rsa.pub"
+                },
+                {
+                  "mountPath": "/home/atlantis/.terraform-key/key.json",
+                  "name": "tf-key",
+                  "readOnly": true,
+                  "subPath": "key.json"
                 }
               ]
             }
           ],
           "securityContext": {
             "fsGroup": 1000
-          }
+          },
+          "volumes": [
+            {
+              "configMap": {
+                "name": "tf-provider-config"
+              },
+              "name": "tf-config"
+            },
+            {
+              "name": "ssh-key",
+              "secret": {
+                "secretName": "ssh-key"
+              }
+            },
+            {
+              "name": "tf-key",
+              "secret": {
+                "secretName": "tf-key"
+              }
+            }
+          ]
         }
       },
       "updateStrategy": {

@@ -24,7 +24,7 @@ spec:
         image: ghcr.io/runatlantis/atlantis:v0.21.0 # 1. Replace <VERSION> with the most recent release.
         env:
         - name: ATLANTIS_REPO_ALLOWLIST
-          value: github.com/belas80/devops-diplom-netology/* # 2. Replace this with your own repo allowlist.
+          value: github.com/belas80/devops-diplom-netology # 2. Replace this with your own repo allowlist.
 
         ### GitHub Config ###
         - name: ATLANTIS_GH_USER
@@ -45,9 +45,6 @@ spec:
           value: /atlantis
         - name: ATLANTIS_PORT
           value: "4141" # Kubernetes sets an ATLANTIS_PORT variable so we need to override.
-        volumeMounts:
-        - name: atlantis-data
-          mountPath: /atlantis
         ports:
         - name: atlantis
           containerPort: 4141
@@ -74,6 +71,31 @@ spec:
             port: 4141
             # If using https, change this to HTTPS
             scheme: HTTP
+        volumeMounts:
+        - name: atlantis-data
+          mountPath: /atlantis
+        - name: tf-config
+          mountPath: /home/atlantis/.terraformrc
+          subPath: .terraformrc
+          readOnly: true
+        - name: ssh-key
+          mountPath: /home/atlantis/.ssh/id_rsa.pub
+          subPath: id_rsa.pub
+          readOnly: true
+        - name: tf-key
+          mountPath: /home/atlantis/.terraform-key/key.json
+          subPath: key.json
+          readOnly: true
+      volumes:
+        - name: tf-config
+          configMap:
+            name: tf-provider-config
+        - name: ssh-key
+          secret:
+            secretName: ssh-key
+        - name: tf-key
+          secret:
+            secretName: tf-key
   volumeClaimTemplates:
   - metadata:
       name: atlantis-data

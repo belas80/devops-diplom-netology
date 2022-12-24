@@ -9,7 +9,7 @@ base {
       repo_allowlist: "github.com/belas80/devops-diplom-netology",
       atlantis_url: "http://158.160.47.176:4141",
       repo_config_json: '{"repos":[{"allow_custom_workflows":true,"allowed_overrides":["workflow","apply_requirements","delete_source_branch_on_merge"],"id":"github.com/belas80/devops-diplom-netology"}]}',
-      yandex_key_file: "~/.terraform-key/key.json",
+      yandex_key_file: importstr '/users/a.belyaev/.terraform-key/key.json',
     },
   }
 }
