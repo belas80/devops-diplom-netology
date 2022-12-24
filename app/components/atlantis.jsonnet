@@ -32,7 +32,7 @@ local params = p.components.atlantis;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "tf_access_key",
-                      "name": "atlantis-tf"
+                      "name": "atlantis-secrets"
                     }
                   }
                 },
@@ -41,7 +41,7 @@ local params = p.components.atlantis;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "tf_secret_key",
-                      "name": "atlantis-tf"
+                      "name": "atlantis-secrets"
                     }
                   }
                 },
@@ -61,8 +61,8 @@ local params = p.components.atlantis;
                   "name": "ATLANTIS_GH_TOKEN",
                   "valueFrom": {
                     "secretKeyRef": {
-                      "key": "token",
-                      "name": "atlantis-vcs"
+                      "key": "github_token",
+                      "name": "atlantis-secrets"
                     }
                   }
                 },
@@ -70,8 +70,8 @@ local params = p.components.atlantis;
                   "name": "ATLANTIS_GH_WEBHOOK_SECRET",
                   "valueFrom": {
                     "secretKeyRef": {
-                      "key": "webhook-secret",
-                      "name": "atlantis-vcs"
+                      "key": "github_webhook",
+                      "name": "atlantis-secrets"
                     }
                   }
                 },
