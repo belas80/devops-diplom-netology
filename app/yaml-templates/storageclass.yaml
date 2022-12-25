@@ -1,0 +1,22 @@
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    meta.helm.sh/release-name: nfs
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2022-12-25T13:02:54Z"
+  labels:
+    app: nfs-server-provisioner
+    app.kubernetes.io/managed-by: Helm
+    chart: nfs-server-provisioner-1.1.3
+    heritage: Helm
+    release: nfs
+  name: nfs
+  resourceVersion: "5870"
+  uid: 310342b5-ff82-430f-97be-6a0ec33f3e5b
+mountOptions:
+- vers=3
+provisioner: cluster.local/nfs-nfs-server-provisioner
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
