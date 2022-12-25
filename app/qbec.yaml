@@ -18,8 +18,6 @@ spec:
       server: https://84.201.141.69:6443
       includes:
         - atlantis
-        - configmap
-        - secrets
       excludes:
         - myapp
     jenkins:
@@ -33,5 +31,3 @@ spec:
   excludes:
     - atlantis
     - jenkins
-    - secrets
-    - configmap
