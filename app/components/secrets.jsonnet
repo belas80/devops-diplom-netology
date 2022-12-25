@@ -7,7 +7,8 @@ local params = p.components.secrets;
     "tf_access_key": params.tf_access_key,
     "tf_secret_key": params.tf_secret_key,
     "github_token": params.github_token,
-    "github_webhook": params.github_webhook
+    "github_webhook": params.github_webhook,
+//    "tf-key": params.tf-key
   },
   "kind": "Secret",
   "metadata": {

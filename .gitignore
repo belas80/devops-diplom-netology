@@ -29,9 +29,5 @@ override.tf.json
 # example: *tfplan*
 
 key.json
-*-key.yaml
+.keys
 kubespray
-token
-webhook-secret
-tf_access_key
-tf_secret_key
