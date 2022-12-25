@@ -285,7 +285,7 @@ helm install nfs stable/nfs-server-provisioner
 Конфиги атлантиса
 - [Репо сайд](atlantis.yaml)
 - [Сервер сайд](app/config/repos.yaml)
-- [Env](app/environments/atlantis-deploy.libsonnet)
+- [Env](app/environments/atlantis.libsonnet)
 ```shell
 # Деплой приложения
 qbec apply stage --yes
