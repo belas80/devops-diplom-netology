@@ -283,9 +283,10 @@ Atlanis будет statefulset с постоянным хранилищем и �
 helm install nfs stable/nfs-server-provisioner
 ```
 Конфиги атлантиса
+- [atlantis.jsonnet](app/components/atlantis.jsonnet)
+- [atlantis.libsonnet](app/environments/atlantis.libsonnet)
 - [Репо сайд](atlantis.yaml)
 - [Сервер сайд](app/config/repos.yaml)
-- [Env](app/environments/atlantis.libsonnet)
 ```shell
 # Деплой приложения
 qbec apply stage --yes
