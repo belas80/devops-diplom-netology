@@ -31,7 +31,7 @@ local params = p.components.atlantis;
                   "name": "AWS_ACCESS_KEY_ID",
                   "valueFrom": {
                     "secretKeyRef": {
-                      "key": "tf_access_key",
+                      "key": "aws_access_key",
                       "name": "atlantis-secrets"
                     }
                   }
@@ -40,7 +40,7 @@ local params = p.components.atlantis;
                   "name": "AWS_SECRET_ACCESS_KEY",
                   "valueFrom": {
                     "secretKeyRef": {
-                      "key": "tf_secret_key",
+                      "key": "aws_secret_key",
                       "name": "atlantis-secrets"
                     }
                   }
@@ -134,21 +134,21 @@ local params = p.components.atlantis;
                   "subPath": ".terraformrc"
                 },
                 {
-                  "mountPath": "/home/atlantis/.ssh/id_rsa.pub",
+                  "mountPath": "/home/atlantis/.ssh",
                   "name": "ssh-key",
                   "readOnly": true,
-                  "subPath": "id_rsa.pub"
                 },
                 {
-                  "mountPath": "/home/atlantis/.terraform-key/key.json",
+                  "mountPath": "/home/atlantis/.terraform-key",
                   "name": "tf-key",
                   "readOnly": true,
-                  "subPath": "key.json"
                 }
               ]
             }
           ],
           "securityContext": {
+            "runAsUser": 100,
+            "runAsGroup": 1000,
             "fsGroup": 1000
           },
           "volumes": [
@@ -161,13 +161,25 @@ local params = p.components.atlantis;
             {
               "name": "ssh-key",
               "secret": {
-                "secretName": "ssh-key"
+                "secretName": "atlantis-secrets",
+                "items": [
+                  {
+                    "key": "ssh_key",
+                    "path": "id_rsa.pub"
+                  }
+                ]
               }
             },
             {
               "name": "tf-key",
               "secret": {
-                "secretName": "tf-key"
+                "secretName": "atlantis-secrets",
+                "items": [
+                  {
+                    "key": "tf_json_key",
+                    "path": "key.json"
+                  }
+                ]
               }
             }
           ]

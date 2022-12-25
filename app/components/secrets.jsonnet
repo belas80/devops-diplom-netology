@@ -4,11 +4,12 @@ local params = p.components.secrets;
 {
   "apiVersion": "v1",
   "data": {
-    "tf_access_key": params.tf_access_key,
-    "tf_secret_key": params.tf_secret_key,
+    "aws_access_key": params.aws_access_key,
+    "aws_secret_key": params.aws_secret_key,
     "github_token": params.github_token,
     "github_webhook": params.github_webhook,
-//    "tf-key": params.tf-key
+    "tf_json_key": params.tf_json_key,
+    "ssh_key": params.ssh_key
   },
   "kind": "Secret",
   "metadata": {
