@@ -18,6 +18,8 @@ spec:
       server: https://84.201.141.69:6443
       includes:
         - atlantis
+        - configmap
+        - secrets
       excludes:
         - myapp
     atlantis-deploy:
@@ -34,16 +36,10 @@ spec:
         - jenkins
       excludes:
         - myapp
-    secrets:
-      defaultNamespace: default
-      server: https://84.201.141.69:6443
-      includes:
-        - secrets
-      excludes:
-        - myapp
   vars: {}
   excludes:
     - atlantis
     - atlantis-deploy
     - jenkins
     - secrets
+    - configmap

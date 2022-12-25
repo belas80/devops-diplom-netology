@@ -1,5 +1,5 @@
 local p = import '../params.libsonnet';
-local params = p.components.secrets;
+local params = p.components.atlantis;
 
 {
   "apiVersion": "v1",

@@ -7,7 +7,8 @@ local params = p.components.atlantis;
     "apiVersion": "apps/v1",
     "kind": "StatefulSet",
     "metadata": {
-      "name": "atlantis"
+      "name": "atlantis",
+      "namespace": params.namespace
     },
     "spec": {
       "replicas": 1,
@@ -215,7 +216,8 @@ local params = p.components.atlantis;
     "apiVersion": "v1",
     "kind": "Service",
     "metadata": {
-      "name": "atlantis"
+      "name": "atlantis",
+      "namespace": params.namespace
     },
     "spec": {
       "ports": [
