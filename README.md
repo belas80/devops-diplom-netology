@@ -278,22 +278,9 @@ service/prometheus-operator     ClusterIP   None            <none>        8443/T
 ![](img/grafana-dashboards.png)
 ![](img/grafana-workload.png)
 2. Воспользовался qbec для организации конфигурации тестового приложения и atlantis. Все исходники [здесь](app).  
-Для atlanis перед деплоем нужно создать секреты для досутпа к github и terraform, а так же configMap для настройки Yandex провайдера и публичный ключ (для проброса в vm).  
+Atlanis будет statefulset с постоянным хранилищем и перед деплоем его нужно подготовить. В качестве хранилище будет NFS сервер и для простоты воспользуемся helm.  
 ```shell
-# Для github
-kubectl create secret generic atlantis-vcs --from-file=token --from-file=webhook-secret
-
-# Для доступа к S3, где хранятся стейты
-kubectl create secret generic atlantis-tf --from-file=tf_access_key --from-file=tf_secret_key
-
-# Для доступа к облаку Yandex, ключ сервисной учетки
-kubectl create secret generic tf-key --from-file=$HOME/.terraform-key/key.json
-
-# ssh-key для vm
-kubectl create secret generic ssh-key --from-file=$HOME/.ssh/id_rsa.pub
-
-# Настройка Yandex провайдера
-kubectl create configmap tf-provider-config --from-file=config/.terraformrc
+helm install nfs stable/nfs-server-provisioner
 ```
 Конфиги атлантиса
 - [Репо сайд](atlantis.yaml)
@@ -303,14 +290,18 @@ kubectl create configmap tf-provider-config --from-file=config/.terraformrc
 # Деплой приложения
 qbec apply stage --yes
 
-# Деплой Атлантиса
-qbec apply atlantis-deploy --yes
-
 # Проверка
 % kubectl get deployments.apps 
 NAME           READY   UP-TO-DATE   AVAILABLE   AGE
-atlantis       1/1     1            1           172m
 myapp-deploy   2/2     2            2           48m
+
+# Деплой Атлантиса
+qbec apply atlantis --yes
+
+# Проверка
+% kubectl -n devops-tools get sts
+NAME       READY   AGE
+atlantis   1/1     47s
 ```
 Приложение доступно из браузера:  
 ![](img/myapp.png)
