@@ -6,7 +6,6 @@ local ip_nodes = importstr '../config/ip_nodes.txt';
 base {
   components +: {
     atlantis +: {
-      namespace: "devops-tools",
       atlantis_user: "belas80",
       repo_allowlist: "github.com/belas80/devops-diplom-netology",
       atlantis_url: "http://"+ip_nodes+":4141",
