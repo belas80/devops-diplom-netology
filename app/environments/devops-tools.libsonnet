@@ -5,9 +5,6 @@ local ip_nodes = importstr '../config/ip_nodes.txt';
 
 base {
   components +: {
-    all +: {
-      namespace: "devops-tools",
-    },
     atlantis +: {
       namespace: "devops-tools",
       atlantis_user: "belas80",
