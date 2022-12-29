@@ -95,16 +95,16 @@ local params = p.components.jenkins;
             {
               "name": "jenkins",
               "image": "jenkins/jenkins:lts",
-              "resources": {
-                "limits": {
-                  "memory": "2Gi",
-                  "cpu": "1000m"
-                },
-                "requests": {
-                  "memory": "500Mi",
-                  "cpu": "500m"
-                }
-              },
+//              "resources": {
+//                "limits": {
+//                  "memory": "2Gi",
+//                  "cpu": "1000m"
+//                },
+//                "requests": {
+//                  "memory": "500Mi",
+//                  "cpu": "500m"
+//                }
+//              },
               "ports": [
                 {
                   "name": "httpport",
