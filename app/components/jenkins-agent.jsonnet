@@ -1,4 +1,3 @@
-local env = std.extVar('qbec.io/envProperties');
 local p = import '../params.libsonnet';
 local params = p.components.jenkinsAgent;
 
