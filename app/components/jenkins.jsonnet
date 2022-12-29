@@ -1,6 +1,5 @@
 local p = import '../params.libsonnet';
-local params = p.components.all;
-local paramsJenkins = p.components.jenkins;
+local params = p.components.jenkins;
 
 [
   {
@@ -28,7 +27,6 @@ local paramsJenkins = p.components.jenkins;
     "kind": "ServiceAccount",
     "metadata": {
       "name": "jenkins-admin",
-      "namespace": params.namespace
     }
   },
   {
@@ -46,7 +44,7 @@ local paramsJenkins = p.components.jenkins;
       {
         "kind": "ServiceAccount",
         "name": "jenkins-admin",
-        "namespace": params.namespace
+        "namespace": "devops-tools"
       }
     ]
   },
@@ -55,16 +53,15 @@ local paramsJenkins = p.components.jenkins;
     "kind": "PersistentVolumeClaim",
     "metadata": {
       "name": "jenkins-pv-claim",
-      "namespace": params.namespace
     },
     "spec": {
-      "storageClassName": paramsJenkins.storageClassName,
+      "storageClassName": params.storageClassName,
       "accessModes": [
         "ReadWriteOnce"
       ],
       "resources": {
         "requests": {
-          "storage": paramsJenkins.storageSize
+          "storage": params.storageSize
         }
       }
     }
@@ -74,10 +71,9 @@ local paramsJenkins = p.components.jenkins;
     "kind": "Deployment",
     "metadata": {
       "name": "jenkins",
-      "namespace": params.namespace
     },
     "spec": {
-      "replicas": paramsJenkins.replicas,
+      "replicas": params.replicas,
       "selector": {
         "matchLabels": {
           "app": "jenkins-server"
@@ -164,7 +160,6 @@ local paramsJenkins = p.components.jenkins;
     "kind": "Service",
     "metadata": {
       "name": "jenkins-service",
-      "namespace": params.namespace,
       "annotations": {
         "prometheus.io/scrape": "true",
         "prometheus.io/path": "/",

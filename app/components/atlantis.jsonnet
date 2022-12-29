@@ -1,18 +1,16 @@
 local p = import '../params.libsonnet';
-local params = p.components.all;
-local paramsAtlantis = p.components.atlantis;
+local params = p.components.atlantis;
 // local prefix = 'atlantis-';
 
 [
   {
       "apiVersion": "v1",
       "data": {
-          ".terraformrc": paramsAtlantis.tf_config
+          ".terraformrc": params.tf_config
       },
       "kind": "ConfigMap",
       "metadata": {
           "name": "tf-provider-config",
-          "namespace": params.namespace,
       }
   },
   {
@@ -20,7 +18,6 @@ local paramsAtlantis = p.components.atlantis;
     "kind": "StatefulSet",
     "metadata": {
       "name": "atlantis",
-      "namespace": params.namespace
     },
     "spec": {
       "replicas": 1,
@@ -60,15 +57,15 @@ local paramsAtlantis = p.components.atlantis;
                 },
                 {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
-                  "value": paramsAtlantis.repo_allowlist
+                  "value": params.repo_allowlist
                 },
                 {
                   "name": "ATLANTIS_ATLANTIS_URL",
-                  "value": paramsAtlantis.atlantis_url
+                  "value": params.atlantis_url
                 },
                 {
                   "name": "ATLANTIS_GH_USER",
-                  "value": paramsAtlantis.atlantis_user
+                  "value": params.atlantis_user
                 },
                 {
                   "name": "ATLANTIS_GH_TOKEN",
@@ -90,7 +87,7 @@ local paramsAtlantis = p.components.atlantis;
                 },
                 {
                   "name": "ATLANTIS_REPO_CONFIG_JSON",
-                  "value": paramsAtlantis.repo_config_json
+                  "value": params.repo_config_json
                 },
                 {
                   "name": "ATLANTIS_DATA_DIR",
@@ -229,7 +226,6 @@ local paramsAtlantis = p.components.atlantis;
     "kind": "Service",
     "metadata": {
       "name": "atlantis",
-      "namespace": params.namespace
     },
     "spec": {
       "ports": [

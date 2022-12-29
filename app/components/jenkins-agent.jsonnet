@@ -1,8 +1,6 @@
 local env = std.extVar('qbec.io/envProperties');
 local p = import '../params.libsonnet';
-local params = p.components.all;
-local paramsAgent = p.components.jenkinsAgent;
-local devopsSec = p.components.devopsSecters;
+local params = p.components.jenkinsAgent;
 
 [
   {
@@ -10,13 +8,12 @@ local devopsSec = p.components.devopsSecters;
     "kind": "Deployment",
     "metadata": {
       "name": "jenkins-agent",
-      "namespace": params.namespace,
       "labels": {
         "jenkins": "jenkins-agent"
       }
     },
     "spec": {
-      "replicas": paramsAgent.replicas,
+      "replicas": params.replicas,
       "selector": {
         "matchLabels": {
           "jenkins": "jenkins-agent"
@@ -123,7 +120,6 @@ local devopsSec = p.components.devopsSecters;
     "kind": "Service",
     "metadata": {
       "name": "jenkins-agent",
-      "namespace": params.namespace
     },
     "spec": {
       "ports": [
@@ -147,7 +143,6 @@ local devopsSec = p.components.devopsSecters;
         "jenkins": "jenkins-agent"
       },
       "name": "jenkins-agent-pv-claim",
-      "namespace": params.namespace
     },
     "spec": {
       "accessModes": [
@@ -158,7 +153,7 @@ local devopsSec = p.components.devopsSecters;
           "storage": "5Gi"
         }
       },
-      "storageClassName": paramsAgent.storageClassName
+      "storageClassName": params.storageClassName
     }
   }
 ]

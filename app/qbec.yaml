@@ -14,7 +14,7 @@ spec:
       defaultNamespace: default
       server: https://84.201.141.69:6443
     devops-tools:
-      defaultNamespace: default
+      defaultNamespace: devops-tools
       server: https://84.201.141.69:6443
       includes:
         - atlantis
