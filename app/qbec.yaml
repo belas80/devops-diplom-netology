@@ -25,9 +25,11 @@ spec:
       server: https://84.201.141.69:6443
       includes:
         - jenkins
+        - jenkins-agent
       excludes:
         - myapp
   vars: {}
   excludes:
     - atlantis
     - jenkins
+    - jenkins-agent

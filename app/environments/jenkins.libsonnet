@@ -10,5 +10,8 @@ base {
       storageSize: "5Gi",
       replicas: 1,
     },
+    jenkinsAgent +: {
+      replicas: 2,
+    },
   }
 }
