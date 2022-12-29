@@ -1,6 +1,8 @@
+local env = std.extVar('qbec.io/envProperties');
 local p = import '../params.libsonnet';
-local params = p.components.jenkins;
+local params = p.components.all;
 local paramsAgent = p.components.jenkinsAgent;
+local devopsSec = p.components.devopsSecters;
 
 [
   {
@@ -8,7 +10,7 @@ local paramsAgent = p.components.jenkinsAgent;
     "kind": "Deployment",
     "metadata": {
       "name": "jenkins-agent",
-      "namespace": "devops-tools",
+      "namespace": params.namespace,
       "labels": {
         "jenkins": "jenkins-agent"
       }
@@ -43,7 +45,7 @@ local paramsAgent = p.components.jenkinsAgent;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "ssh_key",
-                      "name": "jenkins-secrets"
+                      "name": "devops-secrets"
                     }
                   }
                 },
@@ -121,7 +123,7 @@ local paramsAgent = p.components.jenkinsAgent;
     "kind": "Service",
     "metadata": {
       "name": "jenkins-agent",
-      "namespace": "devops-tools"
+      "namespace": params.namespace
     },
     "spec": {
       "ports": [
@@ -145,7 +147,7 @@ local paramsAgent = p.components.jenkinsAgent;
         "jenkins": "jenkins-agent"
       },
       "name": "jenkins-agent-pv-claim",
-      "namespace": "devops-tools"
+      "namespace": params.namespace
     },
     "spec": {
       "accessModes": [
@@ -156,7 +158,7 @@ local paramsAgent = p.components.jenkinsAgent;
           "storage": "5Gi"
         }
       },
-      "storageClassName": params.storageClassName
+      "storageClassName": paramsAgent.storageClassName
     }
   }
 ]

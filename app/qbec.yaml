@@ -20,12 +20,14 @@ spec:
         - atlantis
       excludes:
         - myapp
-    jenkins:
+    devops-tools:
       defaultNamespace: default
       server: https://84.201.141.69:6443
       includes:
+        - atlantis
         - jenkins
         - jenkins-agent
+        - devops-secrets
       excludes:
         - myapp
   vars: {}
@@ -33,3 +35,4 @@ spec:
     - atlantis
     - jenkins
     - jenkins-agent
+    - devops-secrets

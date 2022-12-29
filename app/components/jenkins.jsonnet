@@ -1,5 +1,6 @@
 local p = import '../params.libsonnet';
-local params = p.components.jenkins;
+local params = p.components.all;
+local paramsJenkins = p.components.jenkins;
 
 [
   {
@@ -57,13 +58,13 @@ local params = p.components.jenkins;
       "namespace": params.namespace
     },
     "spec": {
-      "storageClassName": params.storageClassName,
+      "storageClassName": paramsJenkins.storageClassName,
       "accessModes": [
         "ReadWriteOnce"
       ],
       "resources": {
         "requests": {
-          "storage": params.storageSize
+          "storage": paramsJenkins.storageSize
         }
       }
     }
@@ -76,7 +77,7 @@ local params = p.components.jenkins;
       "namespace": params.namespace
     },
     "spec": {
-      "replicas": params.replicas,
+      "replicas": paramsJenkins.replicas,
       "selector": {
         "matchLabels": {
           "app": "jenkins-server"

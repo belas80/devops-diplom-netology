@@ -1,29 +1,13 @@
 local p = import '../params.libsonnet';
-local params = p.components.atlantis;
+local params = p.components.all;
+local paramsAtlantis = p.components.atlantis;
 // local prefix = 'atlantis-';
 
 [
   {
-    "apiVersion": "v1",
-    "data": {
-      "aws_access_key": params.aws_access_key,
-      "aws_secret_key": params.aws_secret_key,
-      "github_token": params.github_token,
-      "github_webhook": params.github_webhook,
-      "tf_json_key": params.tf_json_key,
-      "ssh_key": params.ssh_key
-    },
-    "kind": "Secret",
-    "metadata": {
-      "name": "atlantis-secrets",
-      "namespace": params.namespace
-    },
-    "type": "Opaque"
-  },
-  {
       "apiVersion": "v1",
       "data": {
-          ".terraformrc": params.tf_config
+          ".terraformrc": paramsAtlantis.tf_config
       },
       "kind": "ConfigMap",
       "metadata": {
@@ -61,7 +45,7 @@ local params = p.components.atlantis;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "aws_access_key",
-                      "name": "atlantis-secrets"
+                      "name": "devops-secrets"
                     }
                   }
                 },
@@ -70,28 +54,28 @@ local params = p.components.atlantis;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "aws_secret_key",
-                      "name": "atlantis-secrets"
+                      "name": "devops-secrets"
                     }
                   }
                 },
                 {
                   "name": "ATLANTIS_REPO_ALLOWLIST",
-                  "value": params.repo_allowlist
+                  "value": paramsAtlantis.repo_allowlist
                 },
                 {
                   "name": "ATLANTIS_ATLANTIS_URL",
-                  "value": params.atlantis_url
+                  "value": paramsAtlantis.atlantis_url
                 },
                 {
                   "name": "ATLANTIS_GH_USER",
-                  "value": params.atlantis_user
+                  "value": paramsAtlantis.atlantis_user
                 },
                 {
                   "name": "ATLANTIS_GH_TOKEN",
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "github_token",
-                      "name": "atlantis-secrets"
+                      "name": "devops-secrets"
                     }
                   }
                 },
@@ -100,13 +84,13 @@ local params = p.components.atlantis;
                   "valueFrom": {
                     "secretKeyRef": {
                       "key": "github_webhook",
-                      "name": "atlantis-secrets"
+                      "name": "devops-secrets"
                     }
                   }
                 },
                 {
                   "name": "ATLANTIS_REPO_CONFIG_JSON",
-                  "value": params.repo_config_json
+                  "value": paramsAtlantis.repo_config_json
                 },
                 {
                   "name": "ATLANTIS_DATA_DIR",
@@ -190,7 +174,7 @@ local params = p.components.atlantis;
             {
               "name": "ssh-key",
               "secret": {
-                "secretName": "atlantis-secrets",
+                "secretName": "devops-secrets",
                 "items": [
                   {
                     "key": "ssh_key",
@@ -202,7 +186,7 @@ local params = p.components.atlantis;
             {
               "name": "tf-key",
               "secret": {
-                "secretName": "atlantis-secrets",
+                "secretName": "devops-secrets",
                 "items": [
                   {
                     "key": "tf_json_key",
