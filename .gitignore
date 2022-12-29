@@ -31,3 +31,4 @@ override.tf.json
 key.json
 .keys
 kubespray
+ip_nodes.txt
