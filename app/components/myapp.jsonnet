@@ -28,7 +28,7 @@ local prefix = 'myapp-';
         "spec": {
           "containers": [
             {
-              "image": "belas80/myapp:1.0.0",
+              "image": params.image,
               "name": prefix + "main",
               "ports": [
                 {

@@ -23,7 +23,10 @@ spec:
         - devops-secrets
       excludes:
         - myapp
-  vars: {}
+  vars:
+    external:
+      - name: myapp_image_tag
+        default: latest
   excludes:
     - atlantis
     - jenkins

@@ -6,6 +6,7 @@ base {
   components +: {
     myapp +: {
 //      indexData: 'hello default\n',
+      image: "belas80/myapp:1.0.0",
       replicas: 2,
     },
   }

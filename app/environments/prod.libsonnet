@@ -5,6 +5,7 @@ local base = import './base.libsonnet';
 base {
   components +: {
     myapp +: {
+      image: "belas80/myapp:1.0.0",
       replicas: 3,
     },
   }
