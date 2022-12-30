@@ -45,6 +45,10 @@ local params = p.components.jenkinsAgent;
                     }
                   }
                 },
+//                {
+//                  "name": "KUBECONFIG",
+//                  "value": "/kube"
+//                },
                 {
                   "name": "DOCKER_HOST",
                   "value": "tcp://localhost:2376"
@@ -67,6 +71,11 @@ local params = p.components.jenkinsAgent;
                   "name": "some-docker-certs-client",
                   "mountPath": "/certs/client",
                   "readOnly": true
+                },
+                {
+                  "mountPath": "/home/jenkins/.kube",
+                  "name": "kube-cfg",
+                  "readOnly": true,
                 }
               ]
             },
@@ -90,7 +99,7 @@ local params = p.components.jenkinsAgent;
                 {
                   "name": "some-docker-certs-client",
                   "mountPath": "/certs/client"
-                }
+                },
               ]
             }
           ],
@@ -108,6 +117,18 @@ local params = p.components.jenkinsAgent;
             {
               "name": "some-docker-certs-client",
               "emptyDir": {}
+            },
+            {
+              "name": "kube-cfg",
+              "secret": {
+                "secretName": "devops-secrets",
+                "items": [
+                  {
+                    "key": "kube_cfg",
+                    "path": "config"
+                  }
+                ]
+              }
             }
           ]
         }
