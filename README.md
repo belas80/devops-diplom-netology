@@ -17,6 +17,12 @@
 5. Настроить CI для автоматической сборки и тестирования.
 6. Настроить CD для автоматического развёртывания приложения.
 
+Исходники:
+- [Terraform](terraform)
+- [Prometheus](kube-prometheus)
+- [Qbec конифигурация Kubernetes кластера](app)
+- [Приложение](https://github.com/belas80/myapp.git)
+
 ## Этапы выполнения:  
 
 ### Создание облачной инфраструктуры  
@@ -284,7 +290,6 @@ helm install nfs stable/nfs-server-provisioner
 ```
 Конфиги атлантиса
 - [atlantis.jsonnet](app/components/atlantis.jsonnet)
-- [atlantis.libsonnet](app/environments/atlantis.libsonnet)
 - [Репо сайд](atlantis.yaml)
 - [Сервер сайд](app/config/repos.yaml)
 ```shell
@@ -318,3 +323,385 @@ atlantis   1/1     47s
 ---
 ### Установка и настройка CI/CD
 
+Для автоматической сборки docker image и деплоя приложения при изменении кода, задеплоил в куб Jenkins. Для агента собран докер образ
+с необходимыми инструментами (docker, kubectl и qbec). На этом этапе собрал все инструменты (atlantis, jenkins и их секреты)
+в один environment [devops-tools](app/environments/devops-tools.libsonnet) и в соответствуюещем неймспейсе.
+- [Компонент Jenkins](app/components/jenkins.jsonnet)
+- [Компонент Jenkins Agent](app/components/jenkins-agent.jsonnet)
+- [Dockerfile агента Jenkins](app/docker/jenkins-agent/Dockerfile)
+
+Деплой:  
+```shell
+qbec apply devops-tools -c jenkins -c jenkins-agent
+```
+Проверка всех devops-tools компонентов:  
+```shell
+ % qbec validate devops-tools                            
+setting cluster to cluster.local
+setting context to kubernetes-admin@cluster.local
+cluster metadata load took 229ms
+4 components evaluated in 11ms
+✔ services atlantis -n devops-tools (source atlantis) is valid
+✔ configmaps tf-provider-config -n devops-tools (source atlantis) is valid
+✔ persistentvolumeclaims jenkins-agent-pv-claim -n devops-tools (source jenkins-agent) is valid
+✔ deployments jenkins-agent -n devops-tools (source jenkins-agent) is valid
+✔ statefulsets atlantis -n devops-tools (source atlantis) is valid
+✔ clusterrolebindings jenkins-admin (source jenkins) is valid
+✔ secrets devops-secrets -n devops-tools (source devops-secrets) is valid
+✔ services jenkins-agent -n devops-tools (source jenkins-agent) is valid
+✔ persistentvolumeclaims jenkins-pv-claim -n devops-tools (source jenkins) is valid
+✔ serviceaccounts jenkins-admin -n devops-tools (source jenkins) is valid
+✔ services jenkins-service -n devops-tools (source jenkins) is valid
+✔ clusterroles jenkins-admin (source jenkins) is valid
+✔ deployments jenkins -n devops-tools (source jenkins) is valid
+---
+stats:
+  valid: 13
+
+command took 430ms
+```
+
+В интерфейсе Jenkins создан Multibranch Pipeline, который тригерит на любой пушь и тэг в [репозирии приложения](https://github.com/belas80/myapp.git).
+По пушу делается сборка и заргузка в репозиторий докер хаб, а если указать тэг вида v1.0.0, то дополнительно будет деплой в кластер.  
+Пайплайн Jenkins в файле [Jenkinsfile](https://github.com/belas80/myapp/blob/main/Jenkinsfile), в корне репозитория приложения.  
+
+Результаты:  
+Интерфейс Jenkins
+![](img/jenkins_web.png)
+Вывод консоли на git push
+```shell
+Branch indexing
+ > git rev-parse --resolve-git-dir /var/jenkins_home/caches/git-2ca317e22178ce86cb55b13261242818/.git # timeout=10
+Setting origin to git@github.com:belas80/myapp.git
+ > git config remote.origin.url git@github.com:belas80/myapp.git # timeout=10
+Fetching origin...
+Fetching upstream changes from origin
+ > git --version # timeout=10
+ > git --version # 'git version 2.30.2'
+ > git config --get remote.origin.url # timeout=10
+using GIT_SSH to set credentials 
+ > git fetch --tags --force --progress -- origin +refs/heads/*:refs/remotes/origin/* # timeout=10
+Seen branch in repository origin/main
+Seen 1 remote branch
+Obtained Jenkinsfile from dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on agent1 in /home/jenkins/agent/workspace/myappmulti_main
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Cloning Git)
+[Pipeline] git
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github
+Cloning the remote Git repository
+Cloning repository git@github.com:belas80/myapp.git
+ > git init /home/jenkins/agent/workspace/myappmulti_main # timeout=10
+Fetching upstream changes from git@github.com:belas80/myapp.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.30.2'
+using GIT_SSH to set credentials 
+ > git fetch --tags --force --progress -- git@github.com:belas80/myapp.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url git@github.com:belas80/myapp.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf (refs/remotes/origin/main)
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git checkout -b main dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf # timeout=10
+Commit message: "deploying"
+ > git rev-list --no-walk 2860a8252f943c819be76b010ed219dcb9e50afa # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Building image)
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker build -t belas80/myapp:43 .
+Sending build context to Docker daemon  123.4kB
+
+Step 1/3 : FROM nginx
+ ---> 1403e55ab369
+Step 2/3 : COPY index.html /usr/share/nginx/html
+ ---> 8162455e4bbd
+Step 3/3 : COPY nginx.conf /etc/nginx/conf.d/default.conf
+ ---> 6d1e1f77c898
+Successfully built 6d1e1f77c898
+Successfully tagged belas80/myapp:43
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Pushing image)
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withDockerRegistry
+$ docker login -u belas80 -p ******** https://index.docker.io/v1/
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+WARNING! Your password will be stored unencrypted in /home/jenkins/agent/workspace/myappmulti_main@tmp/4c5f6c91-57d2-45a8-8121-c9fb667fe432/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+[Pipeline] {
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker tag belas80/myapp:43 belas80/myapp:43
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker push belas80/myapp:43
+The push refers to repository [docker.io/belas80/myapp]
+c33959237fae: Preparing
+e13d1c218817: Preparing
+c72d75f45e5b: Preparing
+9a0ef04f57f5: Preparing
+d13aea24d2cb: Preparing
+2b3eec357807: Preparing
+2dadbc36c170: Preparing
+8a70d251b653: Preparing
+2b3eec357807: Waiting
+2dadbc36c170: Waiting
+8a70d251b653: Waiting
+c72d75f45e5b: Layer already exists
+d13aea24d2cb: Layer already exists
+9a0ef04f57f5: Layer already exists
+2b3eec357807: Layer already exists
+8a70d251b653: Layer already exists
+2dadbc36c170: Layer already exists
+c33959237fae: Pushed
+e13d1c218817: Pushed
+43: digest: sha256:e89b1a39ea9a962650a5ad584977e55ec131e92c418e4076fd895e0f41956c05 size: 1984
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withDockerRegistry
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploying image)
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Remove Unused docker image)
+[Pipeline] sh
++ docker rmi belas80/myapp:43
+Untagged: belas80/myapp:43
+Untagged: belas80/myapp@sha256:e89b1a39ea9a962650a5ad584977e55ec131e92c418e4076fd895e0f41956c05
+Deleted: sha256:6d1e1f77c898ddb95b3aab1e97f2fff9f9343266a21a3dad4a6c9bf95f94a4ce
+Deleted: sha256:68ade8f36af5abd143fbbf92a1ceb6db6eb932ee147ba0fcea369720a244827c
+Deleted: sha256:8162455e4bbd587f06581f6b83906f3288cb57a7c5e460f166cca534a97dae1a
+Deleted: sha256:c5c2aea0f7372300ab1cd0740b89a28d94f7988ecd95c15a12e6a3288f6283ad
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
+```
+Вывод консоли на git tag
+```shell
+Branch indexing
+ > git rev-parse --resolve-git-dir /var/jenkins_home/caches/git-2ca317e22178ce86cb55b13261242818/.git # timeout=10
+Setting origin to git@github.com:belas80/myapp.git
+ > git config remote.origin.url git@github.com:belas80/myapp.git # timeout=10
+Fetching origin...
+Fetching upstream changes from origin
+ > git --version # timeout=10
+ > git --version # 'git version 2.30.2'
+ > git config --get remote.origin.url # timeout=10
+using GIT_SSH to set credentials 
+ > git fetch --tags --force --progress -- origin +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/tags/v1.0.29^{commit} # timeout=10
+Obtained Jenkinsfile from dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on agent1 in /home/jenkins/agent/workspace/myappmulti_v1.0.29
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Cloning Git)
+[Pipeline] git
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github
+Cloning the remote Git repository
+Cloning repository git@github.com:belas80/myapp.git
+ > git init /home/jenkins/agent/workspace/myappmulti_v1.0.29 # timeout=10
+Fetching upstream changes from git@github.com:belas80/myapp.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.30.2'
+using GIT_SSH to set credentials 
+ > git fetch --tags --force --progress -- git@github.com:belas80/myapp.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url git@github.com:belas80/myapp.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf (refs/remotes/origin/main)
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+Commit message: "deploying"
+First time build. Skipping changelog.
+ > git checkout -b main dfe12fe1e34cdb8fc5e1112213e87edf43b93bcf # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Building image)
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker build -t belas80/myapp:v1.0.29 .
+Sending build context to Docker daemon  124.4kB
+
+Step 1/3 : FROM nginx
+ ---> 1403e55ab369
+Step 2/3 : COPY index.html /usr/share/nginx/html
+ ---> b0107d9cfc4c
+Step 3/3 : COPY nginx.conf /etc/nginx/conf.d/default.conf
+ ---> 09a40b969f30
+Successfully built 09a40b969f30
+Successfully tagged belas80/myapp:v1.0.29
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Pushing image)
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withDockerRegistry
+$ docker login -u belas80 -p ******** https://index.docker.io/v1/
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+WARNING! Your password will be stored unencrypted in /home/jenkins/agent/workspace/myappmulti_v1.0.29@tmp/0e9b58da-18b0-43a3-8f97-131603681da5/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+[Pipeline] {
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker tag belas80/myapp:v1.0.29 belas80/myapp:v1.0.29
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] isUnix
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] sh
++ docker push belas80/myapp:v1.0.29
+The push refers to repository [docker.io/belas80/myapp]
+7f8796dace3d: Preparing
+b98dee4f03e8: Preparing
+c72d75f45e5b: Preparing
+9a0ef04f57f5: Preparing
+d13aea24d2cb: Preparing
+2b3eec357807: Preparing
+2dadbc36c170: Preparing
+8a70d251b653: Preparing
+2dadbc36c170: Waiting
+8a70d251b653: Waiting
+2b3eec357807: Waiting
+9a0ef04f57f5: Layer already exists
+c72d75f45e5b: Layer already exists
+d13aea24d2cb: Layer already exists
+2dadbc36c170: Layer already exists
+2b3eec357807: Layer already exists
+8a70d251b653: Layer already exists
+7f8796dace3d: Pushed
+b98dee4f03e8: Pushed
+v1.0.29: digest: sha256:27447fd72d38f8968bf8b4efe860735caf718716998d755c2b2f65eae06dab0e size: 1984
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withDockerRegistry
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploying image)
+[Pipeline] git
+The recommended git tool is: NONE
+using credential github
+Fetching changes from the remote Git repository
+ > git rev-parse --resolve-git-dir /home/jenkins/agent/workspace/myappmulti_v1.0.29/.git # timeout=10
+ > git config remote.origin.url git@github.com:belas80/devops-diplom-netology.git # timeout=10
+Fetching upstream changes from git@github.com:belas80/devops-diplom-netology.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.30.2'
+using GIT_SSH to set credentials 
+ > git fetch --tags --force --progress -- git@github.com:belas80/devops-diplom-netology.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Checking out Revision 4262829d77e61f09d93a0bb22e62264dc6be3bec (refs/remotes/origin/main)
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 4262829d77e61f09d93a0bb22e62264dc6be3bec # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D main # timeout=10
+ > git checkout -b main 4262829d77e61f09d93a0bb22e62264dc6be3bec # timeout=10
+Commit message: "fixed jenkis agent dockerfile"
+First time build. Skipping changelog.
+[Pipeline] dir
+Running in /home/jenkins/agent/workspace/myappmulti_v1.0.29/app
+[Pipeline] {
+[Pipeline] sh
++ qbec apply stage --vm:ext-str myapp_image_tag=v1.0.29 --yes
+setting cluster to cluster.local
+setting context to kubernetes-admin@cluster.local
+cluster metadata load took 85ms
+1 components evaluated in 79ms
+
+will synchronize 2 object(s)
+
+1 components evaluated in 70ms
+update deployments myapp-deploy -n default (source myapp)
+server objects load took 219ms
+---
+stats:
+  same: 1
+  updated:
+  - deployments myapp-deploy -n default (source myapp)
+
+waiting for readiness of 1 objects
+  - deployments myapp-deploy -n default
+
+  0s    : deployments myapp-deploy -n default :: 1 out of 2 new replicas have been updated
+  5s    : deployments myapp-deploy -n default :: 1 old replicas are pending termination
+��� 9s    : deployments myapp-deploy -n default :: successfully rolled out (0 remaining)
+
+��� 9s: rollout complete
+command took 9.97s
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Remove Unused docker image)
+[Pipeline] sh
++ docker rmi belas80/myapp:v1.0.29
+Untagged: belas80/myapp:v1.0.29
+Untagged: belas80/myapp@sha256:27447fd72d38f8968bf8b4efe860735caf718716998d755c2b2f65eae06dab0e
+Deleted: sha256:09a40b969f30aed45f1d8b3ff8e57ea21555b9fb9f95fdb0273e21889de5e1f9
+Deleted: sha256:6b3ad3bbeda479096a9da78d46a8e8d75af3eb9813f091ad656da421113acb69
+Deleted: sha256:b0107d9cfc4c116045d93cddc7e042a1c4fbe18b734cb1c477f838f82083f702
+Deleted: sha256:968ab8c2007a9f649b2db73cb948a872a90ad963891881f6f34f1d64ea00ce2d
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
+```
