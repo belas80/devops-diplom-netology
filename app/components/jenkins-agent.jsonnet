@@ -28,7 +28,7 @@ local params = p.components.jenkinsAgent;
           "containers": [
             {
               "name": "jenkins-agent",
-              "image": "belas80/jenkins-agent",
+              "image": params.image,
               "imagePullPolicy": "Always",
               "ports": [
                 {

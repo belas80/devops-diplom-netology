@@ -1,4 +1,8 @@
 FROM jenkins/ssh-agent
+
+ENV KUBECTL_VERSION=v1.26.0
+ENV QBEC_VERSION=v0.15.2
+
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
@@ -12,4 +16,13 @@ RUN apt-get update && apt-get install -y \
     apt-get install -y docker-ce docker-ce-cli
 
 RUN usermod -aG docker jenkins
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl --output-dir /usr/local/bin && \
+    chmod +x /usr/local/bin/kubectl
+
+RUN mkdir /opt/qbec && \
+    curl -SL https://github.com/splunk/qbec/releases/download/$QBEC_VERSION/qbec-linux-amd64.tar.gz | tar -zxC /opt/qbec
+
+ENV PATH=/opt/qbec:$PATH
+
 RUN apt-get clean

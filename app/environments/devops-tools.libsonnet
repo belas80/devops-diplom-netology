@@ -20,6 +20,7 @@ base {
     jenkinsAgent +: {
       storageClassName: "nfs",
       storageSize: "5Gi",
+      image: "belas80/jenkins-agent",
       replicas: 1,
     },
     devopsSecters +: {
