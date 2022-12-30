@@ -21,8 +21,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_
     chmod +x /usr/local/bin/kubectl
 
 RUN mkdir /opt/qbec && \
-    curl -SL https://github.com/splunk/qbec/releases/download/$QBEC_VERSION/qbec-linux-amd64.tar.gz | tar -zxC /opt/qbec
-
-ENV PATH=/opt/qbec:$PATH
+    curl -SL https://github.com/splunk/qbec/releases/download/$QBEC_VERSION/qbec-linux-amd64.tar.gz | tar -zxC /opt/qbec && \
+    ln -s /opt/qbec/qbec /usr/local/bin/qbec && ln -s /opt/qbec/jsonnet-qbec /usr/local/bin
 
 RUN apt-get clean
