@@ -10,6 +10,7 @@ local params = p.components.devopsSecters;
       "github_token": params.github_token,
       "github_webhook": params.github_webhook,
       "tf_json_key": params.tf_json_key,
+      "kube_cfg": params.kube_cfg,
       "ssh_key": params.ssh_key
     },
     "kind": "Secret",

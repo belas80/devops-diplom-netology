@@ -29,6 +29,7 @@ base {
       github_token: std.base64(importstr '../.keys/gh_token'),
       github_webhook: std.base64(importstr '../.keys/gh_webhook_secret'),
       tf_json_key: std.base64(importstr '../.keys/key.json'),
+      kube_cfg: std.base64(importstr '../.keys/kube_cfg'),
       ssh_key: std.base64(importstr '../.keys/id_rsa.pub')
     },
   }
