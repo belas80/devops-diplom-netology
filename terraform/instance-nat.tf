@@ -22,7 +22,7 @@ resource "yandex_compute_instance" "instance-nat" {
     subnet_id      = yandex_vpc_subnet.public.id
     ip_address     = "192.168.1.254"
     nat            = true
-    nat_ip_address = "51.250.70.183"
+#    nat_ip_address = "51.250.70.183"
   }
 
   metadata = {
